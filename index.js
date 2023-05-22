@@ -33,6 +33,20 @@ async function run(){
         
         });
 
+        app.get('/users', async (req, res) => {
+            const { email } = req.query;
+            const user = await allUsers.findOne({ email });
+          
+            if (user) {
+              // User with this email already exists
+              res.json({ alreadyExists: true });
+            } else {
+              // User does not exist, allow them to proceed to the creator form
+              res.json({ alreadyExists: false });
+            }
+          });
+          
+
         app.get('/user/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
@@ -40,11 +54,27 @@ async function run(){
             res.send(user);
         });
 
+        // app.post('/user', async (req, res) => {
+        //     const newUser = req.body;
+        //     const result = await allUsers.insertOne(newUser);
+        //     res.send(result);
+        // })
+
         app.post('/user', async (req, res) => {
             const newUser = req.body;
-            const result = await allUsers.insertOne(newUser);
-            res.send(result);
-        })
+          
+            // Check if an object with the same email already exists
+            const existingUser = await allUsers.findOne({ email: newUser.email });
+            if (existingUser) {
+              res.send({ insertedId: existingUser._id });
+            } else {
+              // Object with the same email doesn't exist, create a new object
+              const result = await allUsers.insertOne(newUser);
+              res.send(result);
+            }
+          });
+          
+        
 
         // app.delete('/user/:id', async (req, res) =>{
         //     const id = req.params.id;
