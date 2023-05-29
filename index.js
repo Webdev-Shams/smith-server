@@ -86,11 +86,6 @@ async function run(){
             }
           });
 
-        // app.post('/user', async (req, res) => {
-        //     const newUser = req.body;
-        //     const result = await allUsers.insertOne(newUser);
-        //     res.send(result);
-        // })
 
         app.post('/user', async (req, res) => {
             const newUser = req.body;
@@ -105,8 +100,50 @@ async function run(){
               res.send(result);
             }
           });
-       
-           
+
+          app.put('/user/upload/images', upload.array('images'), (req, res) => {
+            const userId = req.body.userId;
+            const images = req.files.map((file) => file.filename);
+          
+            // Update the user's imageGallery with the uploaded image filenames
+            allUsers
+              .updateOne(
+                { _id: new ObjectId(userId) },
+                { $push: { imageGallery: { $each: images } } }
+              )
+              .then(() => {
+                // Retrieve the updated user object
+                allUsers.findOne({ _id: new ObjectId(userId) }).then((user) => {
+                  res.json(user); // Send the updated user object in the response
+                });
+              })
+              .catch((error) => {
+                console.error('Error updating user:', error);
+                res.sendStatus(500);
+              });
+          });
+          app.put('/user/upload/videos', upload.array('videos'), (req, res) => {
+            const userId = req.body.userId;
+            const videos = req.files.map((file) => file.filename);
+          
+            // Update the user's imageGallery with the uploaded image filenames
+            allUsers
+              .updateOne(
+                { _id: new ObjectId(userId) },
+                { $push: { videoGallery: { $each: videos } } }
+              )
+              .then(() => {
+                // Retrieve the updated user object
+                allUsers.findOne({ _id: new ObjectId(userId) }).then((user) => {
+                  res.json(user); // Send the updated user object in the response
+                });
+              })
+              .catch((error) => {
+                console.error('Error updating user:', error);
+                res.sendStatus(500);
+              });
+          });
+          
           
         
         app.put('/user/:userId', upload.fields([{ name: 'profileImage', maxCount: 1 }, { name: 'coverImage', maxCount: 1 }]), (req, res) => {
