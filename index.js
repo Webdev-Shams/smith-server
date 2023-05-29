@@ -184,8 +184,61 @@ async function run(){
                 res.sendStatus(500);
               });
           });
+
           
+          app.delete('/uploads/image/:filename', (req, res) => {
+            const filename = req.params.filename;
+            const imagePath = path.join(__dirname, 'uploads', filename);
           
+            // Check if the file exists
+            if (fs.existsSync(imagePath)) {
+              // Delete the file from the server
+              fs.unlinkSync(imagePath);
+          
+              // Delete the image filename from the user object's imageGallery
+              const query = { imageGallery: filename };
+              const update = { $pull: { imageGallery: filename } };
+          
+              allUsers.updateMany(query, update)
+                .then(() => {
+                  res.json({ message: 'Image deleted successfully' });
+                })
+                .catch((error) => {
+                  console.error('Error updating user object:', error);
+                  res.sendStatus(500);
+                });
+            } else {
+              // If the file doesn't exist, send an error response
+              res.status(404).json({ error: 'Image not found' });
+            }
+          });
+          
+          app.delete('/uploads/video/:filename', (req, res) => {
+            const filename = req.params.filename;
+            const videoPath = path.join(__dirname, 'uploads', filename);
+          
+            // Check if the file exists
+            if (fs.existsSync(videoPath)) {
+              // Delete the file from the server
+              fs.unlinkSync(videoPath);
+          
+              // Delete the image filename from the user object's imageGallery
+              const query = { videoGallery: filename };
+              const update = { $pull: { videoGallery: filename } };
+          
+              allUsers.updateMany(query, update)
+                .then(() => {
+                  res.json({ message: 'Video deleted successfully' });
+                })
+                .catch((error) => {
+                  console.error('Error updating user object:', error);
+                  res.sendStatus(500);
+                });
+            } else {
+              // If the file doesn't exist, send an error response
+              res.status(404).json({ error: 'Video not found' });
+            }
+          });
           
           
               
@@ -204,105 +257,3 @@ app.get('/', (req,res) => {
 app.listen(port, () => {
     console.log('Listening Loud to port', port );
 })
-
- // app.post('/user', upload.single('profileImage'), async (req, res) => {
-        //     const newUser = req.body;
-        //     const profileImage = req.file; // Access the uploaded file
-          
-        //     // Check if an object with the same email already exists
-        //     const existingUser = await allUsers.findOne({ email: newUser.email });
-        //     if (existingUser) {
-        //       res.send({ insertedId: existingUser._id });
-        //     } else {
-        //       // Object with the same email doesn't exist, create a new object
-        //       const result = await allUsers.insertOne(newUser);
-        //       res.send(result);
-        //     }
-        //   });          
-
-
-        // app.delete('/user/:id', async (req, res) =>{
-        //     const id = req.params.id;
-        //     const query = {_id: ObjectId(id)};
-        //     const erase = await allUsers.deleteOne(query);
-        //     res.send(erase);
-        // })
-
-        // app.put('/user/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const updateUser = req.body;
-        //     const filter = {_id: new ObjectId(id)};
-        //     const options = { upsert: true };
-        //     const updatedDoc = {
-        //         $set : updateUser
-        //     }
-        //     const result = await allUsers.updateOne(filter, updatedDoc, options);
-        //     res.send(result);
-        // })   
-
-        //   app.put('/user/:userId', upload.single('profileImage'), (req, res) => {
-        //     const userId = req.params.userId;
-        //     const name = req.body.name;
-        //     const socialMedia = req.body.socialMedia;
-        //     const profileImage = req.file;
-          
-        //     // Create the update object
-        //     const update = {
-        //       $set: {
-        //         name: name,
-        //         socialMedia: socialMedia,
-        //       },
-        //     };
-          
-        //     // Check if a new profile image was uploaded
-        //     if (profileImage) {
-        //       update.$set.profileImage = profileImage.filename;
-        //     }
-          
-        //     // Update the user in the database
-        //     allUsers.updateOne({ _id: new ObjectId(userId) }, update)
-        //       .then(() => {
-        //         res.sendStatus(200);
-        //       })
-        //       .catch((error) => {
-        //         console.error('Error updating user:', error);
-        //         res.sendStatus(500);
-        //       });
-        // });
-
-        // app.put('/user/:userId', upload.fields([{ name: 'profileImage', maxCount: 1 }, { name: 'coverImage', maxCount: 1 }]), (req, res) => {
-        //     const userId = req.params.userId;
-        //     const name = req.body.data.name;
-        //     const socialMedia = req.body.data.socialMedia;
-        //     const profileImage = req.files['profileImage'] ? req.files['profileImage'][0] : null;
-        //     const coverImage = req.files['coverImage'] ? req.files['coverImage'][0] : null;
-          
-        //     // Create the update object
-        //     const update = {
-        //       $set: {
-        //         name: name,
-        //         socialMedia: socialMedia,
-        //       },
-        //     };
-          
-        //     // Check if a new profile image was uploaded
-        //     if (profileImage) {
-        //       update.$set.profileImage = profileImage.filename;
-        //     }
-          
-        //     // Check if a new cover image was uploaded
-        //     if (coverImage) {
-        //       update.$set.coverImage = coverImage.filename;
-        //     }
-          
-        //     // Update the user in the database
-        //     allUsers
-        //       .updateOne({ _id: new ObjectId(userId) }, update)
-        //       .then(() => {
-        //         res.sendStatus(200);
-        //       })
-        //       .catch((error) => {
-        //         console.error('Error updating user:', error);
-        //         res.sendStatus(500);
-        //       });
-        //   });       
